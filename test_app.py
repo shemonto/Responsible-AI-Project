@@ -55,7 +55,6 @@ if 'model' not in st.session_state:
 
 # Check if SHAP explainer is loaded
 if 'shap_explainer' not in st.session_state:
-    print('SHAP nai')
     explainer_shap = shap.Explainer(st.session_state.model, st.session_state.X_train_scaled, feature_perturbation="interventional")
     st.session_state.shap_explainer = explainer_shap
 
@@ -99,18 +98,20 @@ except ValueError:
 # Main Content Area based on selected option
 if display_option == "Model Prediction and Feature Values":
     st.write(f"### Prediction for Instance {instance_idx}")
+    
+    # Predict class probabilities
     prediction_proba = st.session_state.model.predict_proba([st.session_state.X_test_scaled[instance_idx]])[0]
-    prediction = "Yes" if st.session_state.model.predict([st.session_state.X_test_scaled[instance_idx]])[0] == 1 else "No"
+    prediction_class = "Yes" if st.session_state.model.predict([st.session_state.X_test_scaled[instance_idx]])[0] == 1 else "No"
     
-    # Display prediction and probability
-    st.write(f"Prediction: **{prediction}**")
-    st.write(f"Probability of interest: **{prediction_proba[1]:.2f}**")
+    # Display prediction and feature values in vertical layout
+    st.write("#### Prediction Result")
+    st.markdown(f"**Prediction:** {prediction_class}")
+    st.markdown(f"**Probability of interest (Class 1):** {prediction_proba[1]:.2f}")
+    st.markdown(f"**Probability of no interest (Class 0):** {prediction_proba[0]:.2f}")
     
-    # Display feature values for the selected instance
-    st.write("### Feature Values")
-    selected_instance = st.session_state.X_test.iloc[instance_idx]
-    for feature, value in selected_instance.items():
-        st.write(f"{feature}: {value}")
+    st.write("#### Feature Values for Instance")
+    st.table(pd.DataFrame([st.session_state.X_test.iloc[instance_idx]], columns=st.session_state.feature_names))
+
 
 elif display_option == "SHAP Explanation":
     st.subheader("SHAP Analysis")
@@ -148,16 +149,13 @@ elif display_option == "LIME Explanation":
         st.session_state.X_test_scaled[instance_idx], st.session_state.model.predict_proba, num_features=11
     )
 
-    # Display the LIME explanation and feature importance side by side with spacing
-    col1, col_space, col2 = st.columns([1, 0.2, 1])
+    # Create two side-by-side plots using columns layout
+    col1, col2 = st.columns(2)
 
-    # LIME Explanation Plot in the first column
     with col1:
         st.write(f"### LIME Explanation Plot for Instance {instance_idx}")
-        
-        # Create the LIME plot
         fig_lime = explanation_lime.as_pyplot_figure()
-        
+
         # Resize the plot to make it larger
         fig_lime.set_size_inches(14, 14)  # Adjust the size (width, height)
         
@@ -173,14 +171,15 @@ elif display_option == "LIME Explanation":
         # Show the plot
         st.pyplot(fig_lime)
 
-    # Show instance features and predictions on the second column
     with col2:
-        st.write(f"### Instance {instance_idx} Features")
-        st.write("Feature Values:")
-        selected_instance = st.session_state.X_test.iloc[instance_idx]
-        for feature, value in selected_instance.items():
-            st.write(f"{feature}: {value}")
+        st.write("### LIME Feature Importance")
+        lime_importance = explanation_lime.as_list()  # Get the feature importances
+
+        # Display feature importance in a table format
+        importance_df = pd.DataFrame(lime_importance, columns=['Feature', 'Importance'])
+        st.dataframe(importance_df.sort_values(by='Importance', ascending=False))
+
+        # Define prediction_proba for the current instance
+        prediction_proba = st.session_state.model.predict_proba([st.session_state.X_test_scaled[instance_idx]])[0]
         
-        st.write("Prediction:")
-        st.write(f"Probability for Class 0: {prediction_proba[0]:.2f}")
-        st.write(f"Probability for Class 1: {prediction_proba[1]:.2f}")
+        
