@@ -11,6 +11,7 @@ import lime.lime_tabular
 import streamlit as st
 
 # Load data
+print(' ** Prothom a **')
 data = pd.read_csv('./cross_sell_rai.csv')
 
 # Preprocess data
@@ -50,28 +51,25 @@ st.write("Choose a display option to view model predictions, SHAP or LIME explan
 st.sidebar.title("Options")
 display_option = st.sidebar.radio(
     "Display Option",
-    ["Model Prediction and Feature Values", "SHAP Explanation", "LIME Explanation"]
+    ["SHAP Explanation", "LIME Explanation", "Model Prediction and Feature Values"]
 )
 
-# Instance Index Input
-# Instance Index Input
+print('before button')
+# Instance Index Input with default 0
 instance_idx_input = st.sidebar.text_input("Enter Instance Index", value="0")
-instance_idx = 0
-enter_button = st.sidebar.button("Enter")
 
 # Handle instance index input
-if enter_button:
-    try:
-        instance_idx = int(instance_idx_input)
-        if instance_idx < 0:
-            st.sidebar.warning("Index cannot be negative. Setting to 0.")
-            instance_idx = 0
-        elif instance_idx >= len(X_test_scaled):
-            st.sidebar.warning(f"Index cannot exceed {len(X_test_scaled) - 1}. Setting to {len(X_test_scaled) - 1}.")
-            instance_idx = len(X_test_scaled) - 1
-    except ValueError:
-        st.sidebar.warning("Invalid input. Please enter a valid integer index.")
+try:
+    instance_idx = int(instance_idx_input)
+    if instance_idx < 0:
+        st.sidebar.warning("Index cannot be negative. Setting to 0.")
         instance_idx = 0
+    elif instance_idx >= len(X_test_scaled):
+        st.sidebar.warning(f"Index cannot exceed {len(X_test_scaled) - 1}. Setting to {len(X_test_scaled) - 1}.")
+        instance_idx = len(X_test_scaled) - 1
+except ValueError:
+    st.sidebar.warning("Invalid input. Please enter a valid integer index.")
+    instance_idx = 0
 
 # Main Content Area based on Display Option
 if display_option == "Model Prediction and Feature Values":
