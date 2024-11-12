@@ -1,5 +1,5 @@
 # Predicting Cross-sell Insurance: Responsible AI Project
-## Python, Scikit-learn, Pandas, Numpy, Imbalanced-learn, Streamlit
+## Technologies used- Python, Scikit-learn, Pandas, Numpy, Imbalanced-learn, Streamlit
 
 ## Objective
 Develop a machine learning model to predict customer interest in vehicle insurance based on their existing health insurance. This project emphasizes Responsible AI by ensuring transparency and interpretability through SHAP and LIME. An interactive dashboard is built using Streamlit to visualize model predictions, making model behavior more transparent for end-users.
